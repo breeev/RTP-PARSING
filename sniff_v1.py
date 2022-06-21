@@ -1,28 +1,16 @@
-<<<<<<< HEAD
-from operator import methodcaller
-from pyshark import LiveCapture
-from console import getTerminalSize
-from os import system
-from re import A, search
-from datetime import datetime
 from netifaces import interfaces
-=======
 from pyshark import LiveCapture
 from console import getTerminalSize
 from os import system
 from re import search
 from datetime import datetime
->>>>>>> a97e4c2dff8572e51fd718623fbf24256b537b8c
 
 # BLACK
 # PRE-COMMIT
 # https://pypi.org/project/g711/
 
-<<<<<<< HEAD
 clean=True # only leave the last merged wave file
-=======
 clean=False # only leave the last merged wave file
->>>>>>> a97e4c2dff8572e51fd718623fbf24256b537b8c
 
 sizex = getTerminalSize()[0]
 CID='undefined'
@@ -30,11 +18,8 @@ fs=8000
 started=False
 m = 4 # margin
 PileAssignment={}
-<<<<<<< HEAD
 SIP1=0
 SIP2=0
-=======
->>>>>>> a97e4c2dff8572e51fd718623fbf24256b537b8c
 
 class Pile:
     def __init__(self,ip):
@@ -52,7 +37,6 @@ class Pile:
 
 class Packet:
     def __init__(self,p):
-<<<<<<< HEAD
         global CID,fs,SIP1,SIP2
         self.sip=None if not hasattr(p,'sip') else p.sip._all_fields
         self.rtp=None if self.sip or not hasattr(p,'rtp') else p.rtp._all_fields
@@ -96,43 +80,6 @@ Created by Breee and Spectra
 print(interfaces)
 capture = LiveCapture(interface=input("Nom de l'interface: "), display_filter='sip or rtp')
 # print(capture.set_debug())
-=======
-        global CID,fs
-        self.sip=self.getsip(p)
-        self.rtp=self.getrtp(p)
-        self.ip=self.getip(p)
-        # SIP info
-        self.method=self.getmethod()
-        self.desc=self.getdesc()
-        self.isok=self.getisok()
-        # see getdate()
-        #self.date=self.getdate()
-        # RTP info
-        self.time=self.gettime()
-        self.data=self.getdata()
-        # GLOBALS
-        if CID=='undefined':CID=self.getcid()
-        if self.getfs():fs=self.getfs()
-    def getsip(self,p):return None if not hasattr(p,'sip') else p.sip._all_fields
-    def getrtp(self,p):return None if self.sip or not hasattr(p,'rtp') else p.rtp._all_fields
-    def getip(self,p):return p['IP'].dst
-    def gettime(self):return None if not self.rtp else int(self.rtp['rtp.timestamp'])
-    def getmethod(self):return None if self.rtp or (not self.sip) or (not 'sip.Method' in self.sip) else self.sip['sip.Method']
-    def getdesc(self):
-        if self.sip:
-            a=list(self.sip.values())[0].replace('SIP/2.0 ','').replace('SIP/2.0','')
-            return (' '*m+('{:->'+str(sizex-m*2)+'}' if a[0].isdigit() else '{}')+'\n').format(a)
-        return ''
-    def getisok(self):return None if (not self.sip) or self.method else self.sip['sip.Status-Code']=='200'
-    # pyshark does not detect dates
-    #def getdate(self):return None if not self.isok else self.sip['sip.Date']
-    def getdata(self):return None if (not self.rtp) or (not 'rtp.payload' in self.rtp) else self.rtp['rtp.payload'].split(":")
-    def getcid(self):return None if not self.sip else self.sip['sip.Call-ID']
-    def getfs(self):return None if self.method!='INVITE' else search(r"telephone-event/([0-9])\w+",self.sip['sip.msg_hdr']).group().split('/')[1]
-
-capture = LiveCapture(interface=input("Nom de l'interface: "), display_filter='sip or rtp')
-print(capture.set_debug())
->>>>>>> a97e4c2dff8572e51fd718623fbf24256b537b8c
 format='%d/%m/%Y %H:%M:%S'
 start=datetime.now().strftime(format)
 for packet in capture.sniff_continuously():
@@ -173,14 +120,5 @@ if PileAssignment and all(list(a.list for a in PileAssignment.values())):
         system(cmd)
     if clean:
         for item in listdir():
-<<<<<<< HEAD
             if search(r"^(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2})){3}.*",item).group().split('/')[1]:remove(item)
-
 with open('infos_call.txt', 'w') as f:f.write("{} --> {}\nDate de début : {: >}\nDate de fin :   {: >}\nCall ID :       {}".format(SIP1,SIP2,start,end,CID))
-=======
-            if item.endswith(".g711u") or len(item.split('.'))==5:remove(item)
-
-with open('infos_call.txt', 'w') as f:
-    f.write("Date de début : {: >}\nDate de fin :   {: >}\nCall ID :       {}".format(start,end,CID))
-
->>>>>>> a97e4c2dff8572e51fd718623fbf24256b537b8c
