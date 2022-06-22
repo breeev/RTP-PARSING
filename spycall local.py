@@ -1,7 +1,5 @@
-from netifaces import interfaces
-from pyshark import LiveCapture
+from pyshark import FileCapture
 from console import getTerminalSize
-from os import system
 from re import search
 from datetime import datetime
 
@@ -10,7 +8,6 @@ from datetime import datetime
 # https://pypi.org/project/g711/
 
 clean=True # only leave the last merged wave file
-clean=False # only leave the last merged wave file
 
 sizex = getTerminalSize()[0]
 CID='undefined'
@@ -63,7 +60,7 @@ print('''
 Created by Breee and Spectra
 21/06/2022
 
-  ██████  ██▓███ ▓██   ██▓    ▄████▄   ▄▄▄       ██▓     ██▓    
+  ██████  ██▓███ ▓██   ██▓    ▄████▄   ▄▄▄       ██▓     ██▓    (local🥒)
 ▒██    ▒ ▓██░  ██▒▒██  ██▒   ▒██▀ ▀█  ▒████▄    ▓██▒    ▓██▒    
 ░ ▓██▄   ▓██░ ██▓▒ ▒██ ██░   ▒▓█    ▄ ▒██  ▀█▄  ▒██░    ▒██░    
   ▒   ██▒▒██▄█▓▒ ▒ ░ ▐██▓░   ▒▓▓▄ ▄██▒░██▄▄▄▄██ ▒██░    ▒██░    
@@ -75,13 +72,18 @@ Created by Breee and Spectra
                   ░ ░        ░                                  
 '''
 )
-print(interfaces)
-capture = LiveCapture(interface=input("Nom de l'interface: "), display_filter='sip or rtp')
-print("[+] Démarrage du sniffing...")
+from sys import argv
+#file='D:/dwn/RTP temp/forensic.pcap'
+file=(' '.join(argv[1:])).replace('"','').replace("'",'').replace('\\','/')
+if not file:
+    from tkinter.filedialog import askopenfilename
+    file=askopenfilename(title='Open a capture file',filetypes=[('Packet Capture','*.pcap')])
+if not file:exit('No file selected.')
+capture = FileCapture(file,display_filter='sip or rtp')
 # print(capture.set_debug())
 format='%d/%m/%Y %H:%M:%S'
 start=datetime.now().strftime(format)
-for packet in capture.sniff_continuously():
+for packet in capture:
     p=Packet(packet)
     if p.ip!='192.168.0.100':
         #print(vars(p))
@@ -101,13 +103,17 @@ for key in PileAssignment:
     if not PileAssignment[key].list:del PileAssignment[key]
 if PileAssignment and all(list(a.list for a in PileAssignment.values())):
     from sys import platform
-    from os import remove,listdir
+    from os import system,remove,listdir,chdir,mkdir
+    from os.path import isdir
     if platform=='win32':
+        path='C:/spycall'
+        if not isdir(path):mkdir(path)
+        chdir(path)
         for ip in PileAssignment:PileAssignment[ip].write()
         from subprocess import call
         with open('temp.bat','w') as f:f.write('set PATH="C:\\Program Files (x86)\\sox-14-4-2"\nsox --type raw --rate 8000 -e u-law %1.g711u %1.wav\nsox --type raw --rate 8000 -e u-law %2.g711u %2.wav\nsox -M %1.wav %2.wav %3.wav')
         ips=list(ip for ip in PileAssignment)
-        call(['temp.bat',ips[0],ips[1],CID])
+        call(['temp.bat',ips[0],ips[1],file.split('/')[-1].split('.')[-1]])
         remove("temp.bat")
     else:
         cmd='sox -'+('M' if len(PileAssignment)==2 else 'm')
@@ -115,7 +121,7 @@ if PileAssignment and all(list(a.list for a in PileAssignment.values())):
             PileAssignment[ip].write()
             system(f'sox --type raw --rate {fs} -e u-law {ip}.g711u {ip}.wav')
             cmd+=f' {ip}.wav'
-        cmd+=f' {CID}.wav'
+        cmd+=f' {file.split('/')[-1].split('.')[-1]}.wav'
         system(cmd)
     if clean:
         for item in listdir():
