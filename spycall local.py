@@ -121,7 +121,7 @@ if PileAssignment and all(list(a.list for a in PileAssignment.values())):
             PileAssignment[ip].write()
             system(f'sox --type raw --rate {fs} -e u-law {ip}.g711u {ip}.wav')
             cmd+=f' {ip}.wav'
-        cmd+=f' {file.split('/')[-1].split('.')[-1]}.wav'
+        cmd+=f" {file.split('/')[-1].split('.')[-1]}.wav"
         system(cmd)
     if clean:
         for item in listdir():
