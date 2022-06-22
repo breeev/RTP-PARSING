@@ -76,7 +76,11 @@ Created by Breee and Spectra
 '''
 )
 print(interfaces)
-capture = LiveCapture(interface=input("Nom de l'interface: "), display_filter='sip or rtp')
+from sys import argv
+iface=(' '.join(argv[1:]))
+if not iface:iface=input('Input your interface name: ')
+if not iface:exit('No iface selected.')
+capture = LiveCapture(interface=iface, display_filter='sip or rtp')
 print("[+] Démarrage du sniffing...")
 # print(capture.set_debug())
 format='%d/%m/%Y %H:%M:%S'
