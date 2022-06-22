@@ -10,7 +10,6 @@ from datetime import datetime
 # https://pypi.org/project/g711/
 
 clean=True # only leave the last merged wave file
-clean=False # only leave the last merged wave file
 
 sizex = getTerminalSize()[0]
 CID='undefined'
@@ -75,7 +74,7 @@ Created by Breee and Spectra
                   ░ ░        ░                                  
 '''
 )
-print(interfaces)
+print(interfaces())
 from sys import argv
 iface=(' '.join(argv[1:]))
 if not iface:iface=input('Input your interface name: ')
