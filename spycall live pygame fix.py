@@ -24,7 +24,6 @@ from threading import Thread,Event
 from queue import SimpleQueue
 from g711 import decode_ulaw
 from pygame import *
-from pygame._sdl2.audio import get_audio_device_names
 
 # BLACK
 # PRE-COMMIT
@@ -69,24 +68,12 @@ class Packet:
         if not SIP1:SIP1=None if self.method!='INVITE' else self.sip['sip.from.user']
         if not SIP2:SIP2=None if not SIP1 else self.sip['sip.to.user']
 
-from sys import argv,platform
-iface=argv[1].replace("'",'').replace('"','')
-if not iface:
-    print(interfaces())
-    iface=input('Input your interface name: ')
+print(interfaces())
+from sys import argv
+iface=(' '.join(argv[1:]))
+if not iface:iface=input('Input your interface name: ')
 if not iface:exit('No iface selected.')
-if platform!='win32':
-    init_by_me = not mixer.get_init()
-    if init_by_me:mixer.init()
-    devices = tuple(get_audio_device_names(False))
-    if init_by_me:mixer.quit()
-    speaker=argv[2].replace("'",'').replace('"','')
-    if not speaker:
-        print(devices)
-        speaker=input('Input your speaker name: ')
-    if not iface:exit('No speaker selected.')
-    mixer.init(size=32,devicename=speaker)
-else:mixer.init(size=32)
+mixer.init(size=32)
 format='%d/%m/%Y %H:%M:%S'
 release=Event()
 w1=Thread(target=worker,args=[0]).start()
